@@ -1,6 +1,6 @@
 /*
  * Copyright 2008 Ayman Al-Sairafi ayman.alsairafi@gmail.com
- * Copyright 2011-2017 Hanns Holger Rutz.
+ * Copyright 2011-2022 Hanns Holger Rutz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class LineNumbersRuler extends JPanel
     public static final int DEFAULT_R_MARGIN = 5;
     public static final int DEFAULT_L_MARGIN = 5;
     private Status status;
-    private final static int MAX_HEIGHT = Integer.MAX_VALUE - 1000000;
+    private final static int MAX_HEIGHT = 0x100000; // issue #36 - avoid overflow on HiDPI monitors
     //  Text component this TextTextLineNumber component is in sync with
     private JEditorPane editor;
     private int minimumDisplayDigits = 2;

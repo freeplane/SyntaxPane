@@ -1,3 +1,7 @@
+Version 1.2.1
+    * Fixes an issue HiDPI screens
+    * Targets Java 1.8+ now
+
 Version 1.2.0
     * Fixes an issue with OpenJDK 11 (@pguermo)
     * Builds with sbt 1.x now
