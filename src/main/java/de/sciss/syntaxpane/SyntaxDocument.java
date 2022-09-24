@@ -624,6 +624,15 @@ public class SyntaxDocument extends PlainDocument {
         return result.toString();
     }
 
+    public int getOffsetAtLineStart(int line) {
+    	Element lineMap = getDefaultRootElement();
+    	if(line < 0)
+    		return 0;
+		int lineCount = lineMap.getElementCount();
+		return lineMap.getElement(Math.min(line, lineCount - 1)).getStartOffset();
+    }
+    
+    
     /**
      * Returns the starting position of the line at pos
      *
