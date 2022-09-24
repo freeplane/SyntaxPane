@@ -107,7 +107,7 @@ public class GotoLineDialog
             try {
                 int lineNr = Integer.parseInt(line.toString());
                 ActionUtils.insertIntoCombo(jCmbLineNumbers, line);
-                ActionUtils.setCaretPosition(text.get(), lineNr, 0);
+                ActionUtils.setCaretPosition(text.get(), lineNr - 1, 0);
                 setVisible(false);
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Invalid Number: " + line,
