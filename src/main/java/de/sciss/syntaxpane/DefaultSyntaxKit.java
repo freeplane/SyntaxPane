@@ -69,6 +69,7 @@ import de.sciss.syntaxpane.util.JarServiceProvider;
 public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 
     public static final String CONFIG_CARETCOLOR = "CaretColor";
+    public static final String CONFIG_ENABLE_WORD_WRAP = "EnableWordWrap";
     public static final String CONFIG_SELECTION = "SelectionColor";
     public static final String CONFIG_COMPONENTS = "Components";
     public static final String CONFIG_MENU = "PopupMenu";
@@ -314,7 +315,9 @@ public class DefaultSyntaxKit extends DefaultEditorKit implements ViewFactory {
 
     @Override
     public View create(Element element) {
-        return new SyntaxView(element, getConfig());
+        Configuration conf = getConfig();
+        boolean isWordWrapEnabled = conf.getBoolean(CONFIG_ENABLE_WORD_WRAP, false);
+        return isWordWrapEnabled ? new WrappedSyntaxView(element, conf) : new SyntaxView(element, conf);
     }
 
     /**

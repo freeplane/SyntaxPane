@@ -223,10 +223,15 @@ public class ActionUtils {
         if(pos == 0) {
             return 0;
         }
-        Rectangle r = editor.modelToView(pos);
-        int start = editor.viewToModel(new Point(0, r.y));
-        int column = pos - start;
-        return column;
+        if (getSyntaxDocument(editor) != null) {
+            SyntaxDocument sdoc = getSyntaxDocument(editor);
+            return pos - sdoc.getLineStartOffset(pos);
+        } else {
+            Rectangle r = editor.modelToView(pos);
+            int start = editor.viewToModel(new Point(0, r.y));
+            int column = pos - start;
+            return column;
+        }
     }
 
     /**

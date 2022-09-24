@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 Ayman Al-Sairafi ayman.alsairafi@gmail.com
+« * Copyright 2008 Ayman Al-Sairafi ayman.alsairafi@gmail.com
  * Copyright 2011-2022 Hanns Holger Rutz.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,6 +33,8 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
+
+import de.sciss.syntaxpane.DefaultSyntaxKit;
 import de.sciss.syntaxpane.SyntaxDocument;
 import de.sciss.syntaxpane.SyntaxView;
 import de.sciss.syntaxpane.actions.ActionUtils;
@@ -81,6 +83,8 @@ public class LineNumbersRuler extends JPanel
 
     private Color currentLineColor;
 
+    private boolean isWordWrapEnabled;
+
     /**
      * Returns the JScrollPane that contains this EditorPane, or null if no
      * JScrollPane is the parent of this editor
@@ -106,6 +110,7 @@ public class LineNumbersRuler extends JPanel
         setBackground(back);
         setBorder(BorderFactory.createEmptyBorder(0, left, 0, right));
         currentLineColor = config.getColor(PROPERTY_CURRENT_BACK, back);
+        isWordWrapEnabled = config.getBoolean(DefaultSyntaxKit.CONFIG_ENABLE_WORD_WRAP, false);
     }
 
     @Override
@@ -201,7 +206,6 @@ public class LineNumbersRuler extends JPanel
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-
         FontMetrics fontMetrics = getFontMetrics(getFont());
         Insets insets = getInsets();
         int currentLine = -1;
@@ -212,26 +216,65 @@ public class LineNumbersRuler extends JPanel
             // a current line to worry about...
         }
 
-        int lh = fontMetrics.getHeight();
-        int maxLines = ActionUtils.getLineCount(editor);
         SyntaxView.setRenderingHits((Graphics2D) g);
 
         Rectangle clip = g.getClip().getBounds();
-        int topLine    = (int) (clip.getY() / lh);
-        int bottomLine = Math.min(maxLines, (int) (clip.getHeight() + lh - 1) / lh + topLine + 1);
+        int lh = fontMetrics.getHeight();
+        int topY = Math.max(clip.y / lh * lh, 0);
+        int bottomY;
+        if(isWordWrapEnabled) {
+            bottomY = Math.min((clip.y + clip.height) / lh * lh, editor.getHeight()) + lh;
+        }
+        else {
+            int topLine    = (int) (clip.getY() / lh);
+            int maxLines = ActionUtils.getLineCount(editor);
+            int bottomLine = Math.min(maxLines, (int) (clip.getHeight() + lh - 1) / lh + topLine + 1);
+            bottomY = bottomLine * lh;
+        }
 
-        for (int line = topLine; line < bottomLine; line++) {
-            String lineNumber = String.format(numbersFormat, line + 1);
-            int y  = line * lh + insets.top;
-            int yt = y + fontMetrics.getAscent();
+        Point p = new Point();
+        int pos = editor.viewToModel(p);
+        int previousLine = getLineNumber(pos) - 1;
+        for (int y = topY; y < bottomY; y+=lh) {
+            int line;
+            if(isWordWrapEnabled) {
+                p.y = y;
+                pos = editor.viewToModel(p);
+                if(getY(pos) < y)
+                    break;
+                line = getLineNumber(pos);
+            }
+            else {
+                line = previousLine + 1;
+            }
             if (line == currentLine) {
                 g.setColor(currentLineColor);
                 g.fillRect(0, y /* - lh + fontMetrics.getDescent() - 1 */, getWidth(), lh);
                 g.setColor(getForeground());
-                g.drawString(lineNumber, insets.left, yt);
-            } else {
+            }
+            if(! isWordWrapEnabled || line > previousLine && (y > topY || pos == 0 || line > getLineNumber(pos - 1)) ) {
+                previousLine = line;
+                String lineNumber = String.format(numbersFormat, line + 1);
+                int yt = y + fontMetrics.getAscent();
                 g.drawString(lineNumber, insets.left, yt);
             }
+        }
+    }
+
+    private int getY(int pos) {
+        try {
+            return editor.modelToView(pos).y;
+        } catch (BadLocationException e) {
+            return -1;
+        }
+    }
+
+
+    private int getLineNumber(int pos){
+        try {
+            return ActionUtils.getLineNumber(editor, pos);
+        } catch (BadLocationException e) {
+            return -1;
         }
     }
 
