@@ -13,17 +13,36 @@
  */
 package de.sciss.syntaxpane;
 
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JViewport;
 import javax.swing.text.EditorKit;
+
 import de.sciss.syntaxpane.actions.ActionUtils;
 import de.sciss.syntaxpane.actions.CaretMonitor;
+import de.sciss.syntaxpane.util.Configuration;
 
 public class SyntaxTester extends javax.swing.JFrame {
+	private static class SizeChanger extends ComponentAdapter {
+        @Override
+        public void componentResized(ComponentEvent e) {
+            JViewport viewport = (JViewport) e.getComponent();
+            Dimension extentSize = viewport.getExtentSize();
+            Component view = viewport.getView();
+            if(view != null && ! view.getSize().equals(extentSize)) {
+                view.setSize(extentSize);
+                viewport.revalidate();
+            }
+        }
+    }
 
 	/** Creates new form Tester */
 	public SyntaxTester() {
@@ -31,6 +50,7 @@ public class SyntaxTester extends javax.swing.JFrame {
 		// JavaRegex.properties is found in the classpath
 		// DefaultSyntaxKit.registerContentType("text/aa_regex", "de.sciss.syntaxpane.JavaRegexKit");
 		initComponents();
+		jScrollPane1.getViewport().addComponentListener(new SizeChanger());
 		jCmbLangs.setModel(new DefaultComboBoxModel(DefaultSyntaxKit.getContentTypes()));
 		// jEdtTest.setContentType(jCmbLangs.getItemAt(0).toString());
 //		jCmbLangs.setSelectedItem("text/java");
@@ -53,6 +73,7 @@ public class SyntaxTester extends javax.swing.JFrame {
         lblToken = new javax.swing.JLabel();
         jCmbLangs = new javax.swing.JComboBox();
         jToolBar1 = new javax.swing.JToolBar();
+        jWordWrapCheckBox = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("de/sciss/syntaxpane/Bundle"); // NOI18N
@@ -62,8 +83,7 @@ public class SyntaxTester extends javax.swing.JFrame {
         lblCaretPos.setText(bundle.getString("SyntaxTester.lblCaretPos.text")); // NOI18N
 
         jEdtTest.setContentType(bundle.getString("SyntaxTester.jEdtTest.contentType")); // NOI18N
-        jEdtTest.setFont(new java.awt.Font("Monospaced", 0, 13));
-        jEdtTest.setCaretColor(new java.awt.Color(153, 204, 255));
+        jEdtTest.setFont(new java.awt.Font("Monospaced", 0, 13)); // NOI18N
         jEdtTest.addCaretListener(new javax.swing.event.CaretListener() {
             public void caretUpdate(javax.swing.event.CaretEvent evt) {
                 jEdtTestCaretUpdate(evt);
@@ -71,7 +91,7 @@ public class SyntaxTester extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(jEdtTest);
 
-        lblToken.setFont(new java.awt.Font("Courier New", 0, 12));
+        lblToken.setFont(new java.awt.Font("Courier New", 0, 12)); // NOI18N
         lblToken.setText(bundle.getString("SyntaxTester.lblToken.text")); // NOI18N
 
         jCmbLangs.setMaximumRowCount(20);
@@ -85,22 +105,32 @@ public class SyntaxTester extends javax.swing.JFrame {
         jToolBar1.setRollover(true);
         jToolBar1.setFocusable(false);
 
+        jWordWrapCheckBox.setText(bundle.getString("SyntaxTester.jWordWrapCheckBox.text")); // NOI18N
+        jWordWrapCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jWordWrapCheckBoxActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jCmbLangs, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 441, Short.MAX_VALUE)
-                .addComponent(lblCaretPos, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lblToken, javax.swing.GroupLayout.DEFAULT_SIZE, 221, Short.MAX_VALUE)
-                .addGap(484, 484, 484))
             .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 715, Short.MAX_VALUE)
             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 715, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jCmbLangs, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jWordWrapCheckBox, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(lblCaretPos, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(lblToken, javax.swing.GroupLayout.DEFAULT_SIZE, 221, Short.MAX_VALUE)
+                        .addGap(484, 484, 484))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -112,8 +142,9 @@ public class SyntaxTester extends javax.swing.JFrame {
                 .addComponent(lblToken, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblCaretPos, javax.swing.GroupLayout.DEFAULT_SIZE, 21, Short.MAX_VALUE)
-                    .addComponent(jCmbLangs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(lblCaretPos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jCmbLangs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jWordWrapCheckBox))
                 .addContainerGap())
         );
 
@@ -140,32 +171,52 @@ public class SyntaxTester extends javax.swing.JFrame {
 
     private void jCmbLangsItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCmbLangsItemStateChanged
 		if (evt.getStateChange() == ItemEvent.SELECTED) {
-			String lang = jCmbLangs.getSelectedItem().toString();
-
-			// save the state of the current JEditorPane, as it's Document is about
-			// to be replaced.
-			String oldText = jEdtTest.getText();
-
-			// install a new DefaultSyntaxKit on the JEditorPane for the requested language.
-			jEdtTest.setContentType(lang);
-			// Recreate the Toolbar
-			jToolBar1.removeAll();
-			EditorKit kit = jEdtTest.getEditorKit();
-			if (kit instanceof DefaultSyntaxKit) {
-				DefaultSyntaxKit defaultSyntaxKit = (DefaultSyntaxKit) kit;
-				defaultSyntaxKit.addToolBarActions(jEdtTest, jToolBar1);
-			}
-			jToolBar1.validate();
-			try {
-				// setText should not be called (read the JavaDocs).  Better use the read
-				// method and create a new document.
-				jEdtTest.read(new StringReader(oldText), lang);
-			} catch (IOException ex) {
-				Logger.getLogger(SyntaxTester.class.getName()).log(Level.SEVERE, null, ex);
-			}
+			changeLanguageKit();
 		}
 		jEdtTest.requestFocusInWindow();
     }//GEN-LAST:event_jCmbLangsItemStateChanged
+
+	private void changeLanguageKit() {
+		String lang = jCmbLangs.getSelectedItem().toString();
+
+		// save the state of the current JEditorPane, as it's Document is about
+		// to be replaced.
+		String oldText = jEdtTest.getText();
+
+		// install a new DefaultSyntaxKit on the JEditorPane for the requested language.
+		EditorKit k = jEdtTest.getEditorKitForContentType(lang);
+		jEdtTest.setEditorKit(k);
+		// Recreate the Toolbar
+		jToolBar1.removeAll();
+		EditorKit kit = jEdtTest.getEditorKit();
+		if (kit instanceof DefaultSyntaxKit) {
+			DefaultSyntaxKit defaultSyntaxKit = (DefaultSyntaxKit) kit;
+			defaultSyntaxKit.addToolBarActions(jEdtTest, jToolBar1);
+		}
+		jToolBar1.validate();
+		try {
+			// setText should not be called (read the JavaDocs).  Better use the read
+			// method and create a new document.
+			jEdtTest.read(new StringReader(oldText), lang);
+		} catch (IOException ex) {
+			Logger.getLogger(SyntaxTester.class.getName()).log(Level.SEVERE, null, ex);
+		}
+	}
+
+    private void jWordWrapCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jWordWrapCheckBoxActionPerformed
+    	Configuration config = DefaultSyntaxKit.getConfig(DefaultSyntaxKit.class);
+    	config.put(DefaultSyntaxKit.CONFIG_ENABLE_WORD_WRAP, Boolean.toString(jWordWrapCheckBox.isSelected()));
+    	changeLanguageKit();
+    	JViewport viewport = jScrollPane1.getViewport();
+    	if(jWordWrapCheckBox.isSelected()) {
+    		jEdtTest.setSize(1, 1);
+    		jEdtTest.revalidate();
+    		jEdtTest.repaint();
+    	}
+		viewport.revalidate();
+    	viewport.repaint();
+    	jEdtTest.requestFocusInWindow();
+    }//GEN-LAST:event_jWordWrapCheckBoxActionPerformed
 
 	/**
 	 * @param args the command line arguments
@@ -192,6 +243,7 @@ public class SyntaxTester extends javax.swing.JFrame {
     private javax.swing.JEditorPane jEdtTest;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JToolBar jToolBar1;
+    private javax.swing.JCheckBox jWordWrapCheckBox;
     private javax.swing.JLabel lblCaretPos;
     private javax.swing.JLabel lblToken;
     // End of variables declaration//GEN-END:variables
