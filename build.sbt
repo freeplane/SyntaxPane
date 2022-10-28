@@ -1,10 +1,10 @@
 lazy val baseName   = "SyntaxPane"
 lazy val baseNameL  = baseName.toLowerCase
-lazy val gitHost    = "codeberg.org"
-lazy val gitUser    = "sciss"
+lazy val gitHost    = "github.com"
+lazy val gitUser    = "freeplane"
 lazy val gitRepo    = baseName
 
-lazy val projectVersion = "1.2.2"
+lazy val projectVersion = "1.2.3"
 lazy val mimaVersion    = "1.2.0"  // for comparison wrt binary compatibility
 
 // sonatype plugin requires that these are in global
@@ -44,6 +44,12 @@ lazy val publishSettings = Seq(
       name  = "Hanns Holger Rutz",
       email = "contact@sciss.de",
       url   = url("https://www.sciss.de")
+    ),
+    Developer(
+      id    = "dpolivaev",
+      name  = "Dimitry Polivaev",
+      email = "dimitry@freeplane.org",
+      url   = url("https://www.freeplane.org")
     )
   ),
   scmInfo := {
