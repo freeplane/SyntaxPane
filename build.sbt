@@ -4,13 +4,14 @@ lazy val gitHost    = "codeberg.org"
 lazy val gitUser    = "sciss"
 lazy val gitRepo    = baseName
 
-lazy val projectVersion = "1.2.1"
+lazy val projectVersion = "1.2.2"
 lazy val mimaVersion    = "1.2.0"  // for comparison wrt binary compatibility
 
 // sonatype plugin requires that these are in global
 ThisBuild / version       := projectVersion
-ThisBuild / organization  := "de.sciss"
+ThisBuild / organization  := "org.freeplane.de.sciss"
 ThisBuild / versionScheme := Some("pvp")
+ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
 
 lazy val commonSettings = Seq(
   name             := baseName,
@@ -50,4 +51,6 @@ lazy val publishSettings = Seq(
     val a = s"$gitUser/$gitRepo"
     Some(ScmInfo(url(s"https://$h/$a"), s"scm:git@$h:$a.git"))
   },
+  publishTo := sonatypePublishToBundle.value,
+  sonatypeProfileName := "org.freeplane",
 )
